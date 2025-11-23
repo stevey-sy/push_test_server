@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>푸시 메시지 발신 테스트</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            max-width: 800px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+            text-align: center;
+        }
+
+        .subtitle {
+            color: #666;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            color: #333;
+            margin-bottom: 8px;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            font-family: 'Courier New', monospace;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .toggle-section {
+            margin-bottom: 20px;
+        }
+
+        .toggle-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            padding: 12px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .toggle-header:hover {
+            background: #e9ecef;
+        }
+
+        .toggle-header h3 {
+            color: #333;
+            font-size: 16px;
+            margin: 0;
+        }
+
+        .toggle-icon {
+            transition: transform 0.3s ease;
+            font-size: 18px;
+            color: #667eea;
+        }
+
+        .toggle-icon.expanded {
+            transform: rotate(180deg);
+        }
+
+        .json-editor-container {
+            display: none;
+            margin-top: 15px;
+        }
+
+        .json-editor-container.show {
+            display: block;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 300px;
+            padding: 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 13px;
+            font-family: 'Courier New', monospace;
+            resize: vertical;
+            transition: all 0.3s ease;
+            line-height: 1.5;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        textarea.error {
+            border-color: #dc3545;
+        }
+
+        .json-info {
+            background: #e7f3ff;
+            border-left: 4px solid #667eea;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .json-info h4 {
+            color: #333;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .json-info code {
+            background: rgba(102, 126, 234, 0.1);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+        }
+
+        .json-info ul {
+            margin: 8px 0 0 20px;
+            color: #555;
+        }
+
+        .json-info li {
+            margin: 4px 0;
+        }
+
+        .json-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+
+        .json-actions button {
+            flex: 1;
+            min-width: 120px;
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-format {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-format:hover {
+            background: #5568d3;
+        }
+
+        .btn-reset {
+            background: #f5f5f5;
+            color: #666;
+        }
+
+        .btn-reset:hover {
+            background: #e0e0e0;
+        }
+
+        .btn-example {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-example:hover {
+            background: #218838;
+        }
+
+        .json-status {
+            margin-top: 8px;
+            font-size: 12px;
+            padding: 8px;
+            border-radius: 6px;
+            display: none;
+        }
+
+        .json-status.show {
+            display: block;
+        }
+
+        .json-status.valid {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .json-status.invalid {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 30px;
+        }
+
+        button {
+            flex: 1;
+            padding: 14px 24px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-send {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-send:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-send:active:not(:disabled) {
+            transform: translateY(0);
+        }
+
+        .btn-send:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .btn-clear {
+            background: #f5f5f5;
+            color: #666;
+        }
+
+        .btn-clear:hover {
+            background: #e0e0e0;
+        }
+
+        .result {
+            margin-top: 25px;
+            padding: 16px;
+            border-radius: 10px;
+            font-size: 14px;
+            display: none;
+        }
+
+        .result.show {
+            display: block;
+        }
+
+        .result.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .result.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .result-info {
+            margin-top: 10px;
+            font-size: 12px;
+            opacity: 0.8;
+            word-break: break-all;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📱 푸시 메시지 발신 테스트</h1>
+        <p class="subtitle">FCM 토큰을 입력하고 메시지를 커스터마이징하세요</p>
+        
+        <div class="form-group">
+            <label for="tokenInput">FCM 토큰</label>
+            <input 
+                type="text" 
+                id="tokenInput" 
+                placeholder="fRRvyrZqTT2vqprZigangE:APA91b..." 
+                autocomplete="off"
+            >
+        </div>
+
+        <div class="toggle-section">
+            <div class="toggle-header" onclick="toggleJsonEditor()">
+                <h3>📝 메시지 JSON 커스터마이징</h3>
+                <span class="toggle-icon" id="toggleIcon">▼</span>
+            </div>
+            <div class="json-editor-container" id="jsonEditorContainer">
+                <div class="json-info">
+                    <h4>💡 데이터 필드 사용 방법</h4>
+                    <p>커스텀 데이터는 <code>data</code> 필드에 키-값 쌍으로 담아서 보냅니다:</p>
+                    <ul>
+                        <li><code>data</code>: 앱에서 받을 커스텀 데이터 (모든 값은 문자열로 변환됩니다)</li>
+                        <li><code>notification</code>: 사용자에게 표시될 알림 (제목, 내용)</li>
+                        <li><code>android</code>: Android 특정 설정 (우선순위, 사운드 등)</li>
+                    </ul>
+                </div>
+                <textarea 
+                    id="jsonEditor" 
+                    placeholder='메시지 JSON을 입력하세요. 예: {"notification": {"title": "제목", "body": "내용"}, "data": {"key": "value"}}'
+                ></textarea>
+                <div class="json-actions">
+                    <button class="btn-format" onclick="formatJson()">포맷팅</button>
+                    <button class="btn-reset" onclick="resetJson()">기본값으로 리셋</button>
+                    <button class="btn-example" onclick="loadDataExample()">데이터 예시 로드</button>
+                </div>
+                <div class="json-status" id="jsonStatus"></div>
+            </div>
+        </div>
+
+        <div class="button-group">
+            <button class="btn-send" id="sendBtn" onclick="sendPush()">
+                발신하기
+            </button>
+            <button class="btn-clear" onclick="clearInput()">
+                지우기
+            </button>
+        </div>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+        </div>
+
+        <div class="result" id="result"></div>
+    </div>
+
+    <script>
+        const tokenInput = document.getElementById('tokenInput');
+        const sendBtn = document.getElementById('sendBtn');
+        const resultDiv = document.getElementById('result');
+        const loadingDiv = document.getElementById('loading');
+        const jsonEditor = document.getElementById('jsonEditor');
+        const jsonEditorContainer = document.getElementById('jsonEditorContainer');
+        const toggleIcon = document.getElementById('toggleIcon');
+        const jsonStatus = document.getElementById('jsonStatus');
+        
+        let defaultMessage = null;
+        let jsonEditorExpanded = false;
+
+        // Enter 키로 발신 (JSON 에디터가 포커스일 때는 제외)
+        tokenInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                sendPush();
+            }
+        });
+
+        // JSON 에디터 토글
+        function toggleJsonEditor() {
+            jsonEditorExpanded = !jsonEditorExpanded;
+            jsonEditorContainer.classList.toggle('show', jsonEditorExpanded);
+            toggleIcon.classList.toggle('expanded', jsonEditorExpanded);
+            
+            if (jsonEditorExpanded && !defaultMessage) {
+                loadDefaultMessage();
+            }
+        }
+
+        // 기본 메시지 템플릿 로드
+        async function loadDefaultMessage() {
+            try {
+                const response = await fetch('/message-template');
+                defaultMessage = await response.json();
+                jsonEditor.value = JSON.stringify(defaultMessage, null, 2);
+                validateJson();
+            } catch (error) {
+                console.error('기본 메시지 로드 실패:', error);
+                // 기본값 설정
+                defaultMessage = {
+                    notification: {
+                        title: '테스트 알림',
+                        body: '안드로이드 푸시 메시지 테스트입니다.',
+                    },
+                    data: {
+                        type: 'test',
+                        timestamp: new Date().toISOString(),
+                    },
+                    android: {
+                        priority: 'high',
+                        notification: {
+                            sound: 'default',
+                            channelId: 'default',
+                        },
+                    },
+                };
+                jsonEditor.value = JSON.stringify(defaultMessage, null, 2);
+                validateJson();
+            }
+        }
+
+        // JSON 유효성 검사
+        function validateJson() {
+            const jsonText = jsonEditor.value.trim();
+            
+            if (!jsonText) {
+                jsonStatus.classList.remove('show');
+                jsonEditor.classList.remove('error');
+                return true;
+            }
+
+            try {
+                const parsed = JSON.parse(jsonText);
+                if (typeof parsed !== 'object' || parsed === null) {
+                    throw new Error('JSON은 객체여야 합니다.');
+                }
+                jsonStatus.className = 'json-status valid show';
+                jsonStatus.textContent = '✅ 유효한 JSON입니다';
+                jsonEditor.classList.remove('error');
+                return true;
+            } catch (error) {
+                jsonStatus.className = 'json-status invalid show';
+                jsonStatus.textContent = `❌ JSON 오류: ${error.message}`;
+                jsonEditor.classList.add('error');
+                return false;
+            }
+        }
+
+        // JSON 에디터 변경 시 유효성 검사
+        jsonEditor.addEventListener('input', validateJson);
+
+        // JSON 포맷팅
+        function formatJson() {
+            if (!validateJson()) {
+                return;
+            }
+            try {
+                const parsed = JSON.parse(jsonEditor.value);
+                jsonEditor.value = JSON.stringify(parsed, null, 2);
+                validateJson();
+            } catch (error) {
+                showResult('error', 'JSON 포맷팅 실패', error.message);
+            }
+        }
+
+        // JSON 기본값으로 리셋
+        function resetJson() {
+            if (defaultMessage) {
+                jsonEditor.value = JSON.stringify(defaultMessage, null, 2);
+                validateJson();
+            } else {
+                loadDefaultMessage();
+            }
+        }
+
+        // 데이터 예시 로드
+        function loadDataExample() {
+            const exampleMessage = {
+                notification: {
+                    title: '새 메시지',
+                    body: '데이터가 포함된 푸시 알림입니다',
+                },
+                data: {
+                    type: 'message',
+                    userId: '12345',
+                    messageId: '67890',
+                    action: 'open_chat',
+                    timestamp: new Date().toISOString(),
+                    customData1: '값1',
+                    customData2: '값2',
+                },
+                android: {
+                    priority: 'high',
+                    notification: {
+                        sound: 'default',
+                        channelId: 'default',
+                    },
+                },
+            };
+            jsonEditor.value = JSON.stringify(exampleMessage, null, 2);
+            validateJson();
+        }
+
+        async function sendPush() {
+            const token = tokenInput.value.trim();
+
+            if (!token) {
+                showResult('error', '토큰을 입력해주세요.');
+                return;
+            }
+
+            // JSON 유효성 검사
+            let customMessage = null;
+            const jsonText = jsonEditor.value.trim();
+            if (jsonText) {
+                if (!validateJson()) {
+                    showResult('error', 'JSON 형식이 올바르지 않습니다. 수정해주세요.');
+                    return;
+                }
+                try {
+                    customMessage = JSON.parse(jsonText);
+                } catch (error) {
+                    showResult('error', 'JSON 파싱 실패', error.message);
+                    return;
+                }
+            }
+
+            // UI 상태 변경
+            sendBtn.disabled = true;
+            loadingDiv.classList.add('show');
+            resultDiv.classList.remove('show');
+
+            try {
+                const requestBody = { token };
+                if (customMessage) {
+                    requestBody.message = customMessage;
+                }
+
+                const response = await fetch('/push', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(requestBody),
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showResult('success', 
+                        '✅ 푸시 메시지가 성공적으로 발신되었습니다!',
+                        `Message ID: ${data.messageId}<br>발신 시간: ${new Date(data.sentAt).toLocaleString('ko-KR')}`
+                    );
+                } else {
+                    showResult('error', 
+                        '❌ 푸시 메시지 발신 실패',
+                        `에러: ${data.error}${data.code ? '<br>코드: ' + data.code : ''}`
+                    );
+                }
+            } catch (error) {
+                showResult('error', 
+                    '❌ 요청 중 오류가 발생했습니다.',
+                    `에러: ${error.message}`
+                );
+            } finally {
+                sendBtn.disabled = false;
+                loadingDiv.classList.remove('show');
+            }
+        }
+
+        function showResult(type, message, info = '') {
+            resultDiv.className = `result ${type} show`;
+            resultDiv.innerHTML = `
+                <div><strong>${message}</strong></div>
+                ${info ? `<div class="result-info">${info}</div>` : ''}
+            `;
+        }
+
+        function clearInput() {
+            tokenInput.value = '';
+            jsonEditor.value = '';
+            resultDiv.classList.remove('show');
+            jsonStatus.classList.remove('show');
+            jsonEditor.classList.remove('error');
+            tokenInput.focus();
+        }
+
+        // 페이지 로드 시 서버 상태 확인
+        window.addEventListener('load', async () => {
+            try {
+                const response = await fetch('/health');
+                const data = await response.json();
+                if (!data.fcmInitialized) {
+                    showResult('error', '⚠️ FCM이 초기화되지 않았습니다. 서버 설정을 확인해주세요.');
+                }
+            } catch (error) {
+                showResult('error', '⚠️ 서버에 연결할 수 없습니다.');
+            }
+        });
+    </script>
+</body>
+</html>

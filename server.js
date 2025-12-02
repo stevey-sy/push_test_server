@@ -59,7 +59,8 @@ const defaultPushMessage = {
     body: '안드로이드 푸시 메시지 테스트입니다.',
   },
   data: {
-    type: 'test',
+    eventId: '201614188',
+    hasVideo: 'true',
     timestamp: new Date().toISOString(),
   },
   android: {
@@ -69,6 +70,21 @@ const defaultPushMessage = {
       channelId: 'default',
     },
   },
+  apns: {
+    headers : {
+      'apns-priority': '10',
+    },
+    payload: {
+      aps: {
+        'content-available': 1,
+        alert: {
+          title: '테스트 알림',
+          body: '안드로이드 푸시 메시지 테스트입니다.',
+        },
+        sound: 'default',
+      },
+    },
+  }
 };
 
 // 헬스 체크 엔드포인트
@@ -94,12 +110,28 @@ app.post('/push', async (req, res) => {
     });
   }
 
-  const { token } = req.body;
+  const { tokens } = req.body;
 
-  if (!token) {
+  if (!tokens) {
     return res.status(400).json({
       success: false,
-      error: 'push token이 필요합니다.',
+      error: 'push token 배열(tokens)이 필요합니다.',
+    });
+  }
+
+  // tokens가 배열인지 확인
+  if (!Array.isArray(tokens)) {
+    return res.status(400).json({
+      success: false,
+      error: 'tokens는 배열 형식이어야 합니다.',
+    });
+  }
+
+  // 빈 배열 체크
+  if (tokens.length === 0) {
+    return res.status(400).json({
+      success: false,
+      error: 'tokens 배열이 비어있습니다.',
     });
   }
 
@@ -108,29 +140,65 @@ app.post('/push', async (req, res) => {
     
     // 커스텀 메시지가 제공되면 전체를 사용, 아니면 기본 메시지 사용
     if (req.body.message && typeof req.body.message === 'object') {
-      // 커스텀 메시지 사용 (token은 제외하고 병합)
-      const { token: _, ...customMessage } = req.body.message;
+      // 커스텀 메시지 사용 (tokens는 제외하고 병합)
+      const { tokens: _, ...customMessage } = req.body.message;
       message = {
         ...defaultPushMessage,
         ...customMessage,
-        token: token,
       };
     } else {
       // 기본 메시지 사용
       message = {
         ...defaultPushMessage,
-        token: token,
       };
     }
 
-    // FCM으로 메시지 발신
-    const response = await admin.messaging().send(message);
+    // 각 토큰에 대해 개별적으로 메시지 발신 (병렬 처리)
+    const sendPromises = tokens.map(token => {
+      const messageWithToken = {
+        ...message,
+        token: token,
+      };
+      
+      return admin.messaging().send(messageWithToken)
+        .then(messageId => ({
+          token: token,
+          success: true,
+          messageId: messageId,
+          error: null,
+        }))
+        .catch(error => ({
+          token: token,
+          success: false,
+          messageId: null,
+          error: {
+            code: error.code || 'unknown',
+            message: error.message || '알 수 없는 오류',
+          },
+        }));
+    });
+
+    // 모든 요청이 완료될 때까지 대기
+    const results = await Promise.all(sendPromises);
     
-    console.log('✅ 푸시 메시지 발신 성공:', response);
+    // 성공/실패 개수 계산
+    const successCount = results.filter(r => r.success).length;
+    const failureCount = results.filter(r => !r.success).length;
     
+    console.log('✅ 푸시 메시지 발신 완료:', {
+      successCount: successCount,
+      failureCount: failureCount,
+      totalTokens: tokens.length,
+    });
+
     res.json({
       success: true,
-      messageId: response,
+      summary: {
+        total: tokens.length,
+        successCount: successCount,
+        failureCount: failureCount,
+      },
+      results: results,
       sentAt: new Date().toISOString(),
     });
   } catch (error) {

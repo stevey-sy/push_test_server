@@ -451,6 +451,22 @@
             <button class="btn-add-token" onclick="addToken()">+ 토큰 추가</button>
         </div>
 
+        <div class="form-group">
+            <label>토큰당 발송 메시지 수</label>
+            <input 
+                type="number" 
+                id="messagesPerToken" 
+                min="1" 
+                max="100" 
+                value="10" 
+                placeholder="10"
+                style="width: 100%; padding: 12px 16px; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 14px; transition: all 0.3s ease;"
+            >
+            <div style="margin-top: 5px; font-size: 12px; color: #666;">
+                각 토큰에 대해 동시에 발송할 메시지 개수를 입력하세요 (기본값: 10)
+            </div>
+        </div>
+
         <div class="toggle-section">
             <div class="toggle-header" onclick="toggleJsonEditor()">
                 <h3>📝 메시지 JSON 커스터마이징</h3>
@@ -717,8 +733,20 @@
             loadingDiv.classList.add('show');
             resultDiv.classList.remove('show');
 
+            // 발송 메시지 수 가져오기
+            const messagesPerTokenInput = document.getElementById('messagesPerToken');
+            const messagesPerToken = parseInt(messagesPerTokenInput.value) || 10;
+            
+            if (messagesPerToken < 1 || messagesPerToken > 100) {
+                showResult('error', '발송 메시지 수는 1~100 사이의 값이어야 합니다.');
+                return;
+            }
+
             try {
-                const requestBody = { tokens };
+                const requestBody = { 
+                    tokens,
+                    messagesPerToken: messagesPerToken
+                };
                 if (customMessage) {
                     requestBody.message = customMessage;
                 }
@@ -738,7 +766,9 @@
                         <div><strong>✅ 푸시 메시지 발신 완료</strong></div>
                         <div class="result-summary">
                             <strong>요약:</strong><br>
-                            전체: ${data.summary.total}개<br>
+                            토큰 수: ${data.summary.totalTokens}개<br>
+                            토큰당 메시지 수: ${data.summary.messagesPerToken}개<br>
+                            전체 메시지 수: ${data.summary.totalMessages}개<br>
                             성공: ${data.summary.successCount}개<br>
                             실패: ${data.summary.failureCount}개<br>
                             발신 시간: ${new Date(data.sentAt).toLocaleString('ko-KR')}

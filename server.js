@@ -11,7 +11,7 @@ const PORT = process.env.PORT || 3000;
 // 미들웨어 설정
 app.use(cors());
 app.use(express.json());
-app.use(express.static('public'));
+app.use(express.static('public'));     
 
 // FCM 초기화
 let initialized = false;
@@ -56,10 +56,10 @@ try {
 const defaultPushMessage = {
   notification: {
     title: '테스트 알림',
-    body: '안드로이드 푸시 메시지 테스트입니다.',
+    body: '푸시 메시지 테스트입니다.',
   },
   data: {
-    eventId: '201614188',
+    videoId: '201614188',
     hasVideo: 'true',
     timestamp: new Date().toISOString(),
   },
@@ -79,7 +79,7 @@ const defaultPushMessage = {
         'content-available': 1,
         alert: {
           title: '테스트 알림',
-          body: '안드로이드 푸시 메시지 테스트입니다.',
+          body: '푸시 메시지 테스트입니다.',
         },
         sound: 'default',
       },
@@ -110,7 +110,7 @@ app.post('/push', async (req, res) => {
     });
   }
 
-  const { tokens } = req.body;
+  const { tokens, messagesPerToken } = req.body;
 
   if (!tokens) {
     return res.status(400).json({
@@ -135,6 +135,11 @@ app.post('/push', async (req, res) => {
     });
   }
 
+  // messagesPerToken 유효성 검사
+  const MESSAGES_PER_TOKEN = messagesPerToken && messagesPerToken > 0 && messagesPerToken <= 100 
+    ? parseInt(messagesPerToken) 
+    : 10;
+
   try {
     let message;
     
@@ -153,29 +158,34 @@ app.post('/push', async (req, res) => {
       };
     }
 
-    // 각 토큰에 대해 개별적으로 메시지 발신 (병렬 처리)
-    const sendPromises = tokens.map(token => {
-      const messageWithToken = {
-        ...message,
-        token: token,
-      };
-      
-      return admin.messaging().send(messageWithToken)
-        .then(messageId => ({
+    // 각 토큰에 대해 지정된 개수의 메시지를 동시에 발신 (병렬 처리)
+    const sendPromises = tokens.flatMap(token => {
+      // 각 토큰에 대해 10개의 메시지 발신 Promise 생성
+      return Array.from({ length: MESSAGES_PER_TOKEN }, (_, index) => {
+        const messageWithToken = {
+          ...message,
           token: token,
-          success: true,
-          messageId: messageId,
-          error: null,
-        }))
-        .catch(error => ({
-          token: token,
-          success: false,
-          messageId: null,
-          error: {
-            code: error.code || 'unknown',
-            message: error.message || '알 수 없는 오류',
-          },
-        }));
+        };
+        
+        return admin.messaging().send(messageWithToken)
+          .then(messageId => ({
+            token: token,
+            messageIndex: index + 1,
+            success: true,
+            messageId: messageId,
+            error: null,
+          }))
+          .catch(error => ({
+            token: token,
+            messageIndex: index + 1,
+            success: false,
+            messageId: null,
+            error: {
+              code: error.code || 'unknown',
+              message: error.message || '알 수 없는 오류',
+            },
+          }));
+      });
     });
 
     // 모든 요청이 완료될 때까지 대기
@@ -184,17 +194,22 @@ app.post('/push', async (req, res) => {
     // 성공/실패 개수 계산
     const successCount = results.filter(r => r.success).length;
     const failureCount = results.filter(r => !r.success).length;
+    const totalMessages = tokens.length * MESSAGES_PER_TOKEN;
     
     console.log('✅ 푸시 메시지 발신 완료:', {
       successCount: successCount,
       failureCount: failureCount,
       totalTokens: tokens.length,
+      messagesPerToken: MESSAGES_PER_TOKEN,
+      totalMessages: totalMessages,
     });
 
     res.json({
       success: true,
       summary: {
-        total: tokens.length,
+        totalTokens: tokens.length,
+        messagesPerToken: MESSAGES_PER_TOKEN,
+        totalMessages: totalMessages,
         successCount: successCount,
         failureCount: failureCount,
       },

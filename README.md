@@ -85,6 +85,26 @@ The server will start on `http://localhost:3000` (or the PORT specified in your 
 4. Set the number of messages to send per token
 5. Click "Send" button
 
+#### Visual Guide
+
+**Step 1: Enter FCM Tokens**
+
+![Main Interface](screenshot/screenshot_1.png)
+
+- Enter your FCM device tokens (supports multiple tokens)
+- Set the number of messages to send per token (default: 10)
+- Optionally expand "Customize Message JSON" section to customize your push notification
+
+**Step 2: Customize Message (Optional)**
+
+![Message Customization](screenshot/screenshot_2.png)
+
+- Edit the JSON to customize notification title, body, and data fields
+- Use the "FORMAT" button to format your JSON
+- Use "RESET TO DEFAULT" to restore the default template
+- Use "LOAD EXAMPLE" to see a data-rich example
+- Click "SEND" when ready
+
 ### API Endpoints
 
 #### 1. Health Check
@@ -338,6 +358,26 @@ npm run dev
 3. (선택사항) 메시지 JSON 커스터마이징
 4. 토큰당 발송할 메시지 개수 설정
 5. "발신하기" 버튼 클릭
+
+#### 시각적 가이드
+
+**1단계: FCM 토큰 입력**
+
+![메인 인터페이스](screenshot/screenshot_1.png)
+
+- FCM 디바이스 토큰 입력 (여러 토큰 지원)
+- 토큰당 발송할 메시지 개수 설정 (기본값: 10)
+- 선택적으로 "메시지 JSON 커스터마이징" 섹션을 펼쳐서 푸시 알림을 커스터마이징할 수 있습니다
+
+**2단계: 메시지 커스터마이징 (선택사항)**
+
+![메시지 커스터마이징](screenshot/screenshot_2.png)
+
+- JSON을 편집하여 알림 제목, 본문, 데이터 필드를 커스터마이징
+- "포맷팅" 버튼을 사용하여 JSON 포맷 정리
+- "기본값으로 리셋"을 사용하여 기본 템플릿 복원
+- "데이터 예시 로드"를 사용하여 데이터가 풍부한 예시 확인
+- 준비가 되면 "발신하기" 클릭
 
 ### API 엔드포인트
 

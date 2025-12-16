@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>푸시 메시지 발신 테스트</title>
+    <title>Push Message Test Server</title>
     <style>
         * {
             margin: 0;
@@ -432,11 +432,11 @@
 </head>
 <body>
     <div class="container">
-        <h1>📱 푸시 메시지 발신 테스트</h1>
-        <p class="subtitle">FCM 토큰을 입력하고 메시지를 커스터마이징하세요</p>
+        <h1>📱 Push Message Test Server</h1>
+        <p class="subtitle">Enter FCM tokens and customize your messages</p>
         
         <div class="form-group">
-            <label>FCM 토큰 (여러 개 입력 가능)</label>
+            <label>FCM Tokens (Multiple tokens supported)</label>
             <div class="token-list" id="tokenList">
                 <div class="token-item">
                     <input 
@@ -445,51 +445,51 @@
                         placeholder="fRRvyrZqTT2vqprZigangE:APA91b..." 
                         autocomplete="off"
                     >
-                    <button class="btn-remove-token" onclick="removeToken(this)" style="display: none;">삭제</button>
+                    <button class="btn-remove-token" onclick="removeToken(this)" style="display: none;">Remove</button>
                 </div>
             </div>
-            <button class="btn-add-token" onclick="addToken()">+ 토큰 추가</button>
+            <button class="btn-add-token" onclick="addToken()">+ Add Token</button>
         </div>
 
         <div class="form-group">
-            <label>토큰당 발송 메시지 수</label>
-            <input 
-                type="number" 
-                id="messagesPerToken" 
-                min="1" 
-                max="100" 
-                value="10" 
+            <label>Messages per Token</label>
+            <input
+                type="number"
+                id="messagesPerToken"
+                min="1"
+                max="100"
+                value="10"
                 placeholder="10"
                 style="width: 100%; padding: 12px 16px; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 14px; transition: all 0.3s ease;"
             >
             <div style="margin-top: 5px; font-size: 12px; color: #666;">
-                각 토큰에 대해 동시에 발송할 메시지 개수를 입력하세요 (기본값: 10)
+                Enter the number of messages to send simultaneously for each token (Default: 10)
             </div>
         </div>
 
         <div class="toggle-section">
             <div class="toggle-header" onclick="toggleJsonEditor()">
-                <h3>📝 메시지 JSON 커스터마이징</h3>
+                <h3>📝 Customize Message JSON</h3>
                 <span class="toggle-icon" id="toggleIcon">▼</span>
             </div>
             <div class="json-editor-container" id="jsonEditorContainer">
                 <div class="json-info">
-                    <h4>💡 데이터 필드 사용 방법</h4>
-                    <p>커스텀 데이터는 <code>data</code> 필드에 키-값 쌍으로 담아서 보냅니다:</p>
+                    <h4>💡 How to Use Data Fields</h4>
+                    <p>Custom data is sent as key-value pairs in the <code>data</code> field:</p>
                     <ul>
-                        <li><code>data</code>: 앱에서 받을 커스텀 데이터 (모든 값은 문자열로 변환됩니다)</li>
-                        <li><code>notification</code>: 사용자에게 표시될 알림 (제목, 내용)</li>
-                        <li><code>android</code>: Android 특정 설정 (우선순위, 사운드 등)</li>
+                        <li><code>data</code>: Custom data to be received by the app (all values are converted to strings)</li>
+                        <li><code>notification</code>: Notification to be displayed to the user (title, body)</li>
+                        <li><code>android</code>: Android-specific settings (priority, sound, etc.)</li>
                     </ul>
                 </div>
                 <textarea 
                     id="jsonEditor" 
-                    placeholder='메시지 JSON을 입력하세요. 예: {"notification": {"title": "제목", "body": "내용"}, "data": {"key": "value"}}'
+                    placeholder='Enter message JSON. Example: {"notification": {"title": "Title", "body": "Body"}, "data": {"key": "value"}}'
                 ></textarea>
                 <div class="json-actions">
-                    <button class="btn-format" onclick="formatJson()">포맷팅</button>
-                    <button class="btn-reset" onclick="resetJson()">기본값으로 리셋</button>
-                    <button class="btn-example" onclick="loadDataExample()">데이터 예시 로드</button>
+                    <button class="btn-format" onclick="formatJson()">Format</button>
+                    <button class="btn-reset" onclick="resetJson()">Reset to Default</button>
+                    <button class="btn-example" onclick="loadDataExample()">Load Example</button>
                 </div>
                 <div class="json-status" id="jsonStatus"></div>
             </div>
@@ -497,10 +497,10 @@
 
         <div class="button-group">
             <button class="btn-send" id="sendBtn" onclick="sendPush()">
-                발신하기
+                Send
             </button>
             <button class="btn-clear" onclick="clearInput()">
-                지우기
+                Clear
             </button>
         </div>
 
@@ -524,7 +524,7 @@
         let defaultMessage = null;
         let jsonEditorExpanded = false;
 
-        // 토큰 입력 필드 추가
+        // Add token input field
         function addToken() {
             const tokenItem = document.createElement('div');
             tokenItem.className = 'token-item';
@@ -535,26 +535,26 @@
                     placeholder="fRRvyrZqTT2vqprZigangE:APA91b..." 
                     autocomplete="off"
                 >
-                <button class="btn-remove-token" onclick="removeToken(this)">삭제</button>
+                <button class="btn-remove-token" onclick="removeToken(this)">Remove</button>
             `;
             tokenList.appendChild(tokenItem);
             
-            // 새로 추가된 입력 필드에 포커스
+            // Focus on newly added input field
             const newInput = tokenItem.querySelector('.token-input');
             newInput.focus();
             
-            // 첫 번째 토큰 입력 필드의 삭제 버튼 표시 여부 업데이트
+            // Update visibility of remove buttons
             updateRemoveButtons();
         }
 
-        // 토큰 입력 필드 제거
+        // Remove token input field
         function removeToken(button) {
             const tokenItem = button.closest('.token-item');
             tokenItem.remove();
             updateRemoveButtons();
         }
 
-        // 삭제 버튼 표시/숨김 업데이트 (최소 1개는 유지)
+        // Update remove button visibility (keep at least 1 token field)
         function updateRemoveButtons() {
             const tokenItems = tokenList.querySelectorAll('.token-item');
             tokenItems.forEach((item, index) => {
@@ -567,7 +567,7 @@
             });
         }
 
-        // Enter 키로 발신 (토큰 입력 필드에서)
+        // Send on Enter key (from token input field)
         tokenList.addEventListener('keypress', (e) => {
             if (e.target.classList.contains('token-input') && e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
@@ -575,7 +575,7 @@
             }
         });
 
-        // JSON 에디터 토글
+        // Toggle JSON editor
         function toggleJsonEditor() {
             jsonEditorExpanded = !jsonEditorExpanded;
             jsonEditorContainer.classList.toggle('show', jsonEditorExpanded);
@@ -586,7 +586,7 @@
             }
         }
 
-        // 기본 메시지 템플릿 로드
+        // Load default message template
         async function loadDefaultMessage() {
             try {
                 const response = await fetch('/message-template');
@@ -594,12 +594,12 @@
                 jsonEditor.value = JSON.stringify(defaultMessage, null, 2);
                 validateJson();
             } catch (error) {
-                console.error('기본 메시지 로드 실패:', error);
-                // 기본값 설정
+                console.error('Failed to load default message:', error);
+                // Set default values
                 defaultMessage = {
                     notification: {
-                        title: '테스트 알림',
-                        body: '안드로이드 푸시 메시지 테스트입니다.',
+                        title: 'Test Notification',
+                        body: 'This is a push message test.',
                     },
                     data: {
                         eventId: '201614188',
@@ -618,7 +618,7 @@
             }
         }
 
-        // JSON 유효성 검사
+        // Validate JSON
         function validateJson() {
             const jsonText = jsonEditor.value.trim();
             
@@ -631,24 +631,24 @@
             try {
                 const parsed = JSON.parse(jsonText);
                 if (typeof parsed !== 'object' || parsed === null) {
-                    throw new Error('JSON은 객체여야 합니다.');
+                    throw new Error('JSON must be an object.');
                 }
                 jsonStatus.className = 'json-status valid show';
-                jsonStatus.textContent = '✅ 유효한 JSON입니다';
+                jsonStatus.textContent = '✅ Valid JSON';
                 jsonEditor.classList.remove('error');
                 return true;
             } catch (error) {
                 jsonStatus.className = 'json-status invalid show';
-                jsonStatus.textContent = `❌ JSON 오류: ${error.message}`;
+                jsonStatus.textContent = `❌ JSON Error: ${error.message}`;
                 jsonEditor.classList.add('error');
                 return false;
             }
         }
 
-        // JSON 에디터 변경 시 유효성 검사
+        // Validate JSON on editor change
         jsonEditor.addEventListener('input', validateJson);
 
-        // JSON 포맷팅
+        // Format JSON
         function formatJson() {
             if (!validateJson()) {
                 return;
@@ -658,11 +658,11 @@
                 jsonEditor.value = JSON.stringify(parsed, null, 2);
                 validateJson();
             } catch (error) {
-                showResult('error', 'JSON 포맷팅 실패', error.message);
+                showResult('error', 'JSON formatting failed', error.message);
             }
         }
 
-        // JSON 기본값으로 리셋
+        // Reset JSON to default
         function resetJson() {
             if (defaultMessage) {
                 jsonEditor.value = JSON.stringify(defaultMessage, null, 2);
@@ -672,12 +672,12 @@
             }
         }
 
-        // 데이터 예시 로드
+        // Load data example
         function loadDataExample() {
             const exampleMessage = {
                 notification: {
-                    title: '새 메시지',
-                    body: '데이터가 포함된 푸시 알림입니다',
+                    title: 'New Message',
+                    body: 'Push notification with data',
                 },
                 data: {
                     type: 'message',
@@ -685,8 +685,8 @@
                     messageId: '67890',
                     action: 'open_chat',
                     timestamp: new Date().toISOString(),
-                    customData1: '값1',
-                    customData2: '값2',
+                    customData1: 'value1',
+                    customData2: 'value2',
                 },
                 android: {
                     priority: 'high',
@@ -708,37 +708,37 @@
                 .filter(token => token.length > 0);
 
             if (tokens.length === 0) {
-                showResult('error', '최소 1개 이상의 토큰을 입력해주세요.');
+                showResult('error', 'Please enter at least one token.');
                 return;
             }
 
-            // JSON 유효성 검사
+            // JSON validation
             let customMessage = null;
             const jsonText = jsonEditor.value.trim();
             if (jsonText) {
                 if (!validateJson()) {
-                    showResult('error', 'JSON 형식이 올바르지 않습니다. 수정해주세요.');
+                    showResult('error', 'Invalid JSON format. Please correct it.');
                     return;
                 }
                 try {
                     customMessage = JSON.parse(jsonText);
                 } catch (error) {
-                    showResult('error', 'JSON 파싱 실패', error.message);
+                    showResult('error', 'JSON parsing failed', error.message);
                     return;
                 }
             }
 
-            // UI 상태 변경
+            // Update UI state
             sendBtn.disabled = true;
             loadingDiv.classList.add('show');
             resultDiv.classList.remove('show');
 
-            // 발송 메시지 수 가져오기
+            // Get number of messages to send
             const messagesPerTokenInput = document.getElementById('messagesPerToken');
             const messagesPerToken = parseInt(messagesPerTokenInput.value) || 10;
             
             if (messagesPerToken < 1 || messagesPerToken > 100) {
-                showResult('error', '발송 메시지 수는 1~100 사이의 값이어야 합니다.');
+                showResult('error', 'Messages per token must be between 1 and 100.');
                 return;
             }
 
@@ -763,32 +763,32 @@
 
                 if (data.success) {
                     let resultHtml = `
-                        <div><strong>✅ 푸시 메시지 발신 완료</strong></div>
+                        <div><strong>✅ Push Messages Sent Successfully</strong></div>
                         <div class="result-summary">
-                            <strong>요약:</strong><br>
-                            토큰 수: ${data.summary.totalTokens}개<br>
-                            토큰당 메시지 수: ${data.summary.messagesPerToken}개<br>
-                            전체 메시지 수: ${data.summary.totalMessages}개<br>
-                            성공: ${data.summary.successCount}개<br>
-                            실패: ${data.summary.failureCount}개<br>
-                            발신 시간: ${new Date(data.sentAt).toLocaleString('ko-KR')}
+                            <strong>Summary:</strong><br>
+                            Total Tokens: ${data.summary.totalTokens}<br>
+                            Messages per Token: ${data.summary.messagesPerToken}<br>
+                            Total Messages: ${data.summary.totalMessages}<br>
+                            Success: ${data.summary.successCount}<br>
+                            Failed: ${data.summary.failureCount}<br>
+                            Sent At: ${new Date(data.sentAt).toLocaleString('en-US')}
                         </div>
                     `;
 
                     if (data.results && data.results.length > 0) {
-                        resultHtml += '<div style="margin-top: 15px;"><strong>상세 결과:</strong></div>';
+                        resultHtml += '<div style="margin-top: 15px;"><strong>Detailed Results:</strong></div>';
                         data.results.forEach((result, index) => {
                             const statusClass = result.success ? 'success' : 'error';
                             const statusIcon = result.success ? '✅' : '❌';
-                            const statusText = result.success ? '성공' : '실패';
-                            
+                            const statusText = result.success ? 'Success' : 'Failed';
+
                             resultHtml += `
                                 <div class="result-item ${statusClass}">
-                                    <div class="result-item-token">토큰 ${index + 1}: ${result.token.substring(0, 50)}...</div>
+                                    <div class="result-item-token">Token ${index + 1}: ${result.token.substring(0, 50)}...</div>
                                     <div><strong>${statusIcon} ${statusText}</strong></div>
-                                    ${result.success ? 
+                                    ${result.success ?
                                         `<div style="font-size: 11px; color: #666; margin-top: 5px;">Message ID: ${result.messageId}</div>` :
-                                        `<div style="font-size: 11px; color: #dc3545; margin-top: 5px;">${result.error?.message || result.error?.code || '알 수 없는 오류'}</div>`
+                                        `<div style="font-size: 11px; color: #dc3545; margin-top: 5px;">${result.error?.message || result.error?.code || 'Unknown error'}</div>`
                                     }
                                 </div>
                             `;
@@ -797,15 +797,15 @@
 
                     showResult('success', resultHtml);
                 } else {
-                    showResult('error', 
-                        '❌ 푸시 메시지 발신 실패',
-                        `에러: ${data.error}${data.code ? '<br>코드: ' + data.code : ''}`
+                    showResult('error',
+                        '❌ Failed to Send Push Messages',
+                        `Error: ${data.error}${data.code ? '<br>Code: ' + data.code : ''}`
                     );
                 }
             } catch (error) {
-                showResult('error', 
-                    '❌ 요청 중 오류가 발생했습니다.',
-                    `에러: ${error.message}`
+                showResult('error',
+                    '❌ An error occurred during the request.',
+                    `Error: ${error.message}`
                 );
             } finally {
                 sendBtn.disabled = false;
@@ -826,7 +826,7 @@
         }
 
         function clearInput() {
-            // 모든 토큰 입력 필드 제거하고 하나만 남기기
+            // Remove all token input fields except one
             const tokenItems = tokenList.querySelectorAll('.token-item');
             tokenItems.forEach((item, index) => {
                 if (index > 0) {
@@ -842,23 +842,23 @@
             jsonStatus.classList.remove('show');
             jsonEditor.classList.remove('error');
             
-            // 첫 번째 토큰 입력 필드에 포커스
+            // Focus on first token input field
             const firstInput = tokenList.querySelector('.token-input');
             if (firstInput) {
                 firstInput.focus();
             }
         }
 
-        // 페이지 로드 시 서버 상태 확인
+        // Check server status on page load
         window.addEventListener('load', async () => {
             try {
                 const response = await fetch('/health');
                 const data = await response.json();
                 if (!data.fcmInitialized) {
-                    showResult('error', '⚠️ FCM이 초기화되지 않았습니다. 서버 설정을 확인해주세요.');
+                    showResult('error', '⚠️ FCM is not initialized. Please check your server configuration.');
                 }
             } catch (error) {
-                showResult('error', '⚠️ 서버에 연결할 수 없습니다.');
+                showResult('error', '⚠️ Cannot connect to server.');
             }
         });
     </script>
